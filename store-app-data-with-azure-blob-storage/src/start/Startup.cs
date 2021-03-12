@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using FileUploader.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using FileUploader.Models;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace FileUploader
@@ -29,10 +30,10 @@ namespace FileUploader
                 return blobStorage;
             });
 
-            services.AddMvc();
+            services.AddControllersWithViews();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -41,15 +42,20 @@ namespace FileUploader
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
-
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseMvc(routes =>
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
